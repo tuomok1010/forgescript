@@ -1,0 +1,15 @@
+compiler = "clang++"
+
+build_dir = "build"
+
+source_dirs = [
+    "src"
+]
+
+include_dirs = [
+    "include"
+]
+
+libs = [
+    "glfw"
+]
