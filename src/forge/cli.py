@@ -6,6 +6,7 @@ format, and passing the config file forward.
 import argparse
 from forge.logger import log
 from forge.config import configure
+from forge.build import build
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
@@ -202,6 +203,7 @@ def main():
     elif args["command"] == "clean":
         clean_project(config)
 
+    build(config)
 
 if __name__ == "__main__":
     main()

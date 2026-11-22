@@ -1,4 +1,5 @@
-project = "Hello World"
+[project]
+name = "Hello World"
 
 [compiler]
 executable = "clang++"

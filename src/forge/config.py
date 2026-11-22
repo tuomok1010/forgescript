@@ -4,9 +4,14 @@ This script is responsible for reading the config file.
 
 import tomllib
 from copy import deepcopy
+from pathlib import Path
 
 # Default config values
 DEFAULTS = {
+    "project": {
+        "name": "Unnamed Project"
+    },
+
     "compiler": {
         "executable": "clang++",
         "flags": []
@@ -39,7 +44,6 @@ def load_toml(path : str):
     with open(path, "rb") as file:
         return tomllib.load(file)
 
-
 def validate(config: dict):
     # TODO: implement
     None
@@ -53,7 +57,6 @@ def deep_merge(dst, src):
     return dst
 
 def configure(config_path: str, profile: str, overrides: dict):
-
     # Assign default values to current config
     config = deepcopy(DEFAULTS)
 
@@ -82,6 +85,13 @@ def configure(config_path: str, profile: str, overrides: dict):
     # Assign any overrides to the current config
     config = deep_merge(config, overrides)
 
+    # Resolve project root and store in config
+    config_file = Path(config_path).resolve()
+    config["project"]["root"] = config_file.parent
+
+    # Store profile in config
+    config["profile"] = profile
+    
     # Validate
     validate(config)
 
