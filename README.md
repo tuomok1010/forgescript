@@ -1,10 +1,12 @@
 # Forgescript
+![Status](https://img.shields.io/badge/Status-Early%20Development-orange)
+![Linux](https://img.shields.io/badge/Linux-Supported-FCC624?logo=linux&logoColor=black)
+![Windows](https://img.shields.io/badge/Windows-Planned-0078D4?logo=windows&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3.13+-3776AB?logo=python&logoColor=white)
 ![TOML](https://img.shields.io/badge/Config-TOML-9C4121)
-![Linux](https://img.shields.io/badge/Linux-Supported-FCC624?logo=linux&logoColor=black)
 ![C++](https://img.shields.io/badge/C%2B%2B-Build%20System-00599C?logo=cplusplus&logoColor=white)
+![Emacs](https://img.shields.io/badge/Emacs-Planned-7F5AB6?logo=gnu-emacs&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Status](https://img.shields.io/badge/Status-Early%20Development-orange)
 
 A lightweight cross-platform build system for C and C++ projects.
 
