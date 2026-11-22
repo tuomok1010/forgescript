@@ -1,5 +1,7 @@
 '''
-This script is responsible for the parsing of CLI arguments.
+This script is responsible for the parsing of CLI arguments,
+converting them to a dictionary matching the .toml config file
+format, and passing the config file forward.
 '''
 import argparse
 from forge.logger import log
