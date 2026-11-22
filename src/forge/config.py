@@ -3,20 +3,36 @@ This script is responsible for reading the config file.
 '''
 
 import tomllib
+from copy import deepcopy
 
 # Default config values
 DEFAULTS = {
-    "compiler": "clang++",
-    "compiler_flags": ["-g", "-Wall"],
-    "linker_flags": ["-Wl,--verbose"],
-    "output_name": "program",
-    "build_dir": "build",
-    "obj_dir": "build/obj",
-    "include_dirs": ["include"],
-    "source_dirs": ["src"],
-    "log_dir": "log",
-    "lib_dirs": ["libs"],
-    "libs": [],
+    "compiler": {
+        "executable": "clang++",
+        "flags": []
+    },
+
+    "source": {
+        "source_dirs": ["src"],
+        "include_dirs": ["include"]
+    },
+
+    "linker": {
+        "flags": [],
+        "libs": [],
+        "lib_dirs": []
+    },
+
+    "output": {
+        "output_name": "program",
+        "build_dir": "build",
+        "obj_dir": "build/obj"
+    },
+
+    "logging": {
+        "enabled": True,
+        "log_dir": "log"
+    }
 }
 
 def load_toml(path : str):
@@ -28,15 +44,46 @@ def validate(config: dict):
     # TODO: implement
     None
 
-def configure(config_overrides: dict):
-    # Apply defaults to any values to config
-    config = DEFAULTS.copy()
+def deep_merge(dst, src):
+    for key, value in src.items():
+        if (key in dst and isinstance(dst[key], dict) and isinstance(value, dict)):
+            deep_merge(dst[key], value)
+        else:
+            dst[key] = value
+    return dst
 
-    # Load config file and replace any default values
-    config_file = load_toml("../project_conf.toml")
-    config.update(config_file)
+def configure(config_path: str, profile: str, overrides: dict):
 
-    # Replace any configs with CLI overrides
-    config.update(config_overrides)
+    # Assign default values to current config
+    config = deepcopy(DEFAULTS)
 
+    # Read the toml config file
+    toml_config = load_toml(config_path)
+
+    # Extract the desired profile section from the config file
+    profiles = toml_config.get("profiles", {})
+    if profile not in profiles:
+        available = ", ".join(profiles.keys())
+        raise ValueError(
+            f"Unknown profile '{profile}'. "
+            f"Available profiles: {available}"
+        )
+    profile_config = profiles[profile]
+    
+    # Remove all profiles sections from the config file
+    toml_config.pop("profiles", None)
+
+    # Assign settings from the toml config into the current config
+    config = deep_merge(config, toml_config)
+
+    # Assign the desired profile section into the current config
+    config = deep_merge(config, profile_config)
+
+    # Assign any overrides to the current config
+    config = deep_merge(config, overrides)
+
+    # Validate
+    validate(config)
+
+    # Ready!
     return config

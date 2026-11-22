@@ -16,6 +16,22 @@ _ = ap.add_argument(
 )
 
 _ = ap.add_argument(
+    "-f",
+    "--config",
+    dest="config_file",
+    default="conf.toml",
+    help="Path to configuration file"
+)
+
+_ = ap.add_argument(
+    "-p",
+    "--profile",
+    choices=["debug", "release"],
+    default="debug",
+    help="Build profile"
+)
+
+_ = ap.add_argument(
     "-C",
     "--compiler",
     dest="compiler",
@@ -98,6 +114,67 @@ _ = ap.add_argument(
     help="Libraries"
 )
 
+# Craft a dictionary matching the .toml config file structure
+def make_overrides(args):
+    overrides = {}
+    
+    if args["compiler"] is not None:
+        overrides.setdefault(
+            "compiler", {}
+        )["executable"] = args["compiler"]
+
+    if args["compiler_flags"] is not None:
+        overrides.setdefault(
+            "compiler", {}
+        )["flags"] = args["compiler_flags"]
+
+    if args["linker_flags"] is not None:
+        overrides.setdefault(
+            "linker", {}
+        )["flags"] = args["linker_flags"]
+
+    if args["libs"] is not None:
+        overrides.setdefault(
+            "linker", {}
+        )["libs"] = args["libs"]
+
+    if args["lib_dirs"] is not None:
+        overrides.setdefault(
+            "linker", {}
+        )["lib_dirs"] = args["lib_dirs"]
+
+    if args["source_dirs"] is not None:
+        overrides.setdefault(
+            "source", {}
+        )["source_dirs"] = args["source_dirs"]
+
+    if args["include_dirs"] is not None:
+        overrides.setdefault(
+            "source", {}
+        )["include_dirs"] = args["include_dirs"]
+
+    if args["build_dir"] is not None:
+        overrides.setdefault(
+            "output", {}
+        )["build_dir"] = args["build_dir"]
+
+    if args["obj_dir"] is not None:
+        overrides.setdefault(
+            "output", {}
+        )["obj_dir"] = args["obj_dir"]
+
+    if args["output_name"] is not None:
+        overrides.setdefault(
+            "output", {}
+        )["output_name"] = args["output_name"]
+
+    if args["log_dir"] is not None:
+        overrides.setdefault(
+            "logging", {}
+        )["log_dir"] = args["log_dir"]
+
+    return overrides
+
 def build_project(args):
     log.debug("build_project")
 
@@ -107,21 +184,21 @@ def clean_project(args):
 
 def main():
     args = vars(ap.parse_args())
+    
+    cli_overrides = make_overrides(args)
+    config = configure(
+        args["config_file"],
+        args["profile"],
+        cli_overrides
+    )
+
+    log.info(config)
 
     if args["command"] == "build":
-        build_project(args)
+        build_project(config)
 
     elif args["command"] == "clean":
-        clean_project(args)
-
-    cli_config = {
-        key: value
-        for key, value in args.items()
-        if value is not None
-    }
-
-    config = configure(cli_config)
-    log.info(config)
+        clean_project(config)
 
 
 if __name__ == "__main__":

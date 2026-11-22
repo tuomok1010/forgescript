@@ -1,0 +1,34 @@
+project = "Test Project"
+
+[compiler]
+executable = "clang++"
+
+[source]
+source_dirs = ["src"]
+include_dirs = ["include"]
+
+[profiles.debug.compiler]
+flags = ["-g"]
+
+[profiles.debug.output]
+build_dir = "build/debug"
+obj_dir = "build/debug/obj"
+
+[profiles.debug.linker]
+flags = ["-Wl,--verbose"]
+
+[profiles.release.output]
+build_dir = "build/release"
+obj_dir = "build/release/obj"
+
+[profiles.release.compiler]
+flags = [
+    "-O3",
+    "-DNDEBUG",
+    "-Wall"
+]
+
+[profiles.release.linker]
+flags = [
+    "-Wl,--verbose"
+]
