@@ -6,6 +6,7 @@ from pathlib import Path
 import datetime
 from forge.logger import log
 from forge.compiler import compile_sources
+from forge.linker import link_objects
 
 
 def collect_sources(config):
@@ -16,6 +17,13 @@ def collect_sources(config):
         sources.extend(source_path.rglob("*.cpp"))
         sources.extend(source_path.rglob("*.c"))
     return sources
+
+def collect_objects(config):
+    project_root = config["project"]["root"]
+    obj_path = (project_root / config['output']['obj_dir'])
+    objects = []
+    objects.extend(obj_path.rglob("*.o"))
+    return objects
 
 def build(config):
     # Log config
@@ -48,4 +56,13 @@ def build(config):
     # Compile sources
     compile_sources(config, sources)
 
-    # Link object files
+    # Collect object files
+    objects = collect_objects(config)
+
+    # Log objects
+    log.info("Discovered objects:")
+    for object in objects:
+        log.info(object)
+
+    # Link objects
+    link_objects(config, objects)

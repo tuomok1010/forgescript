@@ -1,3 +1,7 @@
+'''
+This scrpt is responsible for building all source files
+'''
+
 from pathlib import Path
 import subprocess
 
@@ -26,7 +30,7 @@ def compile_source(config, source):
     # Add sources and output directories to the command
     cmd.extend(["-c", str(source), "-o", str(obj_file)])
 
-    # Execute!
+    # Compile!
     subprocess.run(cmd, check=True)
 
 def compile_sources(config, sources):
