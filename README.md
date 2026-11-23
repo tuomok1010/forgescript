@@ -23,6 +23,7 @@ Forgescript is implemented in Python and configured with TOML. Its goal is to pr
 - Executable linking
 - Project-relative path handling
 - Preserved source tree structure in object directories
+- Incremental compilation
 
 ## Example Project Structure
 
@@ -191,7 +192,6 @@ The build pipeline has been verified by successfully building and running a C++ 
 
 ## Planned Features
 
-- Incremental compilation
 - Clean command
 - Run command
 - Improved logging
