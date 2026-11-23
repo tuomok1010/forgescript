@@ -38,7 +38,7 @@ def link_objects(config, objects):
 
     # Link!!
     try:
-        log.info("Linking...")
+        log.info(f"Linking {config['output']['output_name']}")
         subprocess.run(cmd, check=True, capture_output=True, text=True)
         
     except subprocess.CalledProcessError as e:

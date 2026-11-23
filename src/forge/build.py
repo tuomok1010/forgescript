@@ -5,6 +5,7 @@ Build functionality.
 from pathlib import Path
 import datetime
 import shutil
+import subprocess
 from forge.logger import log
 from forge.compiler import compile_sources
 from forge.linker import link_objects
@@ -63,6 +64,8 @@ Source directories:    {config['source']['source_dirs']}
     # Link objects
     link_objects(config, objects)
 
+    log.info("BUILD COMPLETE")
+
 def clean(config):
     project_root = config["project"]["root"]
     build_dir = config['output']['build_dir']
@@ -71,3 +74,19 @@ def clean(config):
     shutil.rmtree(build_dir_full, ignore_errors=True)
     build_dir_full.mkdir(parents=True, exist_ok=True)
     log.info("Clean complete")
+
+def run(config):
+    # Output full filepath
+    output_file = (
+        config["project"]["root"]
+        / config["output"]["build_dir"]
+        / config["output"]["output_name"]
+    )
+
+    try:
+        log.info(f"Running {config['output']['output_name']}")
+        subprocess.run([str(output_file)], check=True)
+        
+    except subprocess.CalledProcessError as e:
+        log.error("Running failed")
+        log.error(e.stderr)
