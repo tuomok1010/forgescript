@@ -5,8 +5,9 @@ from forge.logger import log
 from pathlib import Path
 import subprocess
 
-
-def link_objects(config, objects):
+def link_objects(config, objects, stats):
+    stats.linked = False
+    
     # Add linker (in this case same as the compiler)
     cmd = [config["compiler"]["executable"]]
 
@@ -40,10 +41,11 @@ def link_objects(config, objects):
     try:
         log.info(f"Linking {config['output']['output_name']}")
         subprocess.run(cmd, check=True, capture_output=True, text=True)
+        stats.linked = True
+        log.info("Linking complete")
         
     except subprocess.CalledProcessError as e:
         log.error("Linking failed")
         log.error(e.stderr)
+        stats.linked = False
         return False
-
-    log.info("Linking complete")

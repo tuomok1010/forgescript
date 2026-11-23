@@ -4,11 +4,20 @@ Build functionality.
 
 from pathlib import Path
 import datetime
+import time
 import shutil
 import subprocess
 from forge.logger import log
 from forge.compiler import compile_sources
 from forge.linker import link_objects
+
+class BuildStats:
+    compiled: int = 0
+    skipped: int = 0
+    failed: int = 0
+    linked: bool = False
+    build_start: float = 0.0
+    build_end: float = 0.0
 
 
 def collect_sources(config):
@@ -27,14 +36,12 @@ def collect_objects(config):
     objects.extend(obj_path.rglob("*.o"))
     return objects
 
-def build(config):
-    # Log basic config
+def print_build_initial(config):
     log.info(
         f"""
 ===============
-~ FORGESCRIPT ~
-===============
 BUILD STARTED:         {datetime.datetime.now().strftime('%c')}
+===============
 Project:               {config['project']['name']}
 Profile:               {config['profile']}
 Compiler:              {config['compiler']['executable']}
@@ -48,23 +55,53 @@ Logging directory:     {config['logging']['log_dir']}
 Include directories:   {config['source']['include_dirs']}
 Library directories:   {config['linker']['lib_dirs']}
 Source directories:    {config['source']['source_dirs']}
-===============\n
+===============
         """
     )
+
+def print_build_summary(stats: BuildStats):
+    log.info(
+        f"""
+===============
+BUILD ENDED:           {datetime.datetime.now().strftime('%c')}
+===============
+Compiled:              {stats.compiled}
+Skipped:               {stats.skipped}
+Failed:                {stats.failed}
+Linked:                {stats.linked}
+Duration:              {stats.build_end - stats.build_start:.3f} s
+===============
+        """
+    )
+
+def build(config):
+    # Init stats for storing summary
+    stats = BuildStats()
+    
+    # Store accurate start time
+    stats.build_start = time.perf_counter()
+    
+    # Print initial info
+    print_build_initial(config)
 
     # Collect source files
     sources = collect_sources(config)
     
     # Compile sources
-    compile_sources(config, sources)
+    compile_sources(config, sources, stats)
 
     # Collect object files
     objects = collect_objects(config)
 
     # Link objects
-    link_objects(config, objects)
+    link_objects(config, objects, stats)
 
-    log.info("BUILD COMPLETE")
+    # Store accurate end time
+    stats.build_end = time.perf_counter()
+
+    # Print summary
+    print_build_summary(stats)
+    
 
 def clean(config):
     project_root = config["project"]["root"]

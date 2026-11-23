@@ -5,7 +5,10 @@ from forge.logger import log
 from pathlib import Path
 import subprocess
 
-def compile_source(config, source):
+def compile_source(config, source, stats):
+    global compiled
+    global skipped
+    
     # Get source file relative path to root
     rel_src_path = source.relative_to(config["project"]["root"])
 
@@ -25,6 +28,7 @@ def compile_source(config, source):
 
         if object_time >= source_time:
             log.info(f"Skipping {rel_src_path} (up-to-date)")
+            stats.skipped += 1
             return
         
     # Add compiler + flags to the compile command
@@ -43,15 +47,21 @@ def compile_source(config, source):
     try:
         log.info(f"Compiling {rel_src_path}...")
         subprocess.run(cmd, check=True, capture_output=True, text=True)
+        stats.compiled += 1
         
     except subprocess.CalledProcessError as e:
-        log.error("Compilation failed")
+        log.error(f"Compilation failed for {rel_src_path}")
         log.error(e.stderr)
+        stats.failed += 1
         return False
     
 
-def compile_sources(config, sources):
+def compile_sources(config, sources, stats):
+    stats.compiled = 0
+    stats.skipped = 0
+    stats.failed = 0
+    
     for source in sources:
-        compile_source(config, source)
+        compile_source(config, source, stats)
 
     log.info(f"Compile complete")
