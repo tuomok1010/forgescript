@@ -6,7 +6,7 @@ format, and passing the config file forward.
 import argparse
 from forge.logger import log
 from forge.config import configure
-from forge.build import build
+from forge.build import build, clean
 
 # Construct the argument parser
 ap = argparse.ArgumentParser()
@@ -178,12 +178,6 @@ def make_overrides(args):
 
     return overrides
 
-def build_project(args):
-    log.debug("build_project")
-
-def clean_project(args):
-    log.debug("clean_project")
-
 
 def main():
     args = vars(ap.parse_args())
@@ -195,15 +189,11 @@ def main():
         cli_overrides
     )
 
-    log.info(config)
-
     if args["command"] == "build":
-        build_project(config)
+        build(config)
 
     elif args["command"] == "clean":
-        clean_project(config)
-
-    build(config)
+        clean(config)
 
 if __name__ == "__main__":
     main()

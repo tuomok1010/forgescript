@@ -4,6 +4,7 @@ Build functionality.
 
 from pathlib import Path
 import datetime
+import shutil
 from forge.logger import log
 from forge.compiler import compile_sources
 from forge.linker import link_objects
@@ -61,3 +62,12 @@ Source directories:    {config['source']['source_dirs']}
 
     # Link objects
     link_objects(config, objects)
+
+def clean(config):
+    project_root = config["project"]["root"]
+    build_dir = config['output']['build_dir']
+    build_dir_full = (project_root / build_dir)
+    
+    shutil.rmtree(build_dir_full, ignore_errors=True)
+    build_dir_full.mkdir(parents=True, exist_ok=True)
+    log.info("Clean complete")

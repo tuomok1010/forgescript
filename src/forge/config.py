@@ -46,6 +46,7 @@ def load_toml(path : str):
 
 def validate(config: dict):
     # TODO: implement
+    # Validate build_dir <-- must be inside project root, should also explicitly disallow root folder "/"
     None
 
 def deep_merge(dst, src):

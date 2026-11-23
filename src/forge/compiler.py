@@ -39,12 +39,19 @@ def compile_source(config, source):
     # Add sources and output directories to the command
     cmd.extend(["-c", str(source), "-o", str(obj_file)])
 
-    # Log compile
-    log.info(f"Compiling {rel_src_path}")
-
     # Compile!
-    subprocess.run(cmd, check=True)
+    try:
+        log.info(f"Compiling {rel_src_path}...")
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        
+    except subprocess.CalledProcessError as e:
+        log.error("Compilation failed")
+        log.error(e.stderr)
+        return False
+    
 
 def compile_sources(config, sources):
     for source in sources:
         compile_source(config, source)
+
+    log.info(f"Compile complete")

@@ -1,9 +1,10 @@
 '''
 This script is responsible for linking all object files
 '''
-
+from forge.logger import log
 from pathlib import Path
 import subprocess
+
 
 def link_objects(config, objects):
     # Add linker (in this case same as the compiler)
@@ -35,5 +36,14 @@ def link_objects(config, objects):
     # Add output
     cmd.extend(["-o", str(output_file)])
 
-    # Link!
-    subprocess.run(cmd, check=True)
+    # Link!!
+    try:
+        log.info("Linking...")
+        subprocess.run(cmd, check=True, capture_output=True, text=True)
+        
+    except subprocess.CalledProcessError as e:
+        log.error("Linking failed")
+        log.error(e.stderr)
+        return False
+
+    log.info("Linking complete")
