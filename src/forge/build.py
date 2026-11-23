@@ -39,38 +39,38 @@ def collect_objects(config):
 def print_build_initial(config):
     log.info(
         f"""
-===============
+================================================
 BUILD STARTED:         {datetime.datetime.now().strftime('%c')}
-===============
-Project:               {config['project']['name']}
-Profile:               {config['profile']}
-Compiler:              {config['compiler']['executable']}
-Compiler flags:        {config['compiler']['flags']}
-Linker flags:          {config['linker']['flags']}
-Libraries:             {config['linker']['libs']}
-Output:                {config['output']['output_name']}
-Build directory:       {config['output']['build_dir']}
-Object directory:      {config['output']['obj_dir']}
-Logging directory:     {config['logging']['log_dir']}
-Include directories:   {config['source']['include_dirs']}
-Library directories:   {config['linker']['lib_dirs']}
-Source directories:    {config['source']['source_dirs']}
-===============
+================================================
+Project:               {config['project']['name'] or "None"}
+Profile:               {config['profile'] or "None"}
+Compiler:              {config['compiler']['executable'] or "None"}
+Compiler flags:        {" ".join(config['compiler']['flags']) or "None"}
+Linker flags:          {" ".join(config['linker']['flags']) or "None"}
+Libraries:             {" ".join(config['linker']['libs']) or "None"}
+Output:                {config['output']['output_name'] or "None"}
+Build directory:       {config['output']['build_dir'] or "None"}
+Object directory:      {config['output']['obj_dir'] or "None"}
+Logging directory:     {config['logging']['log_dir'] or "None"}
+Include directories:   {" ".join(config['source']['include_dirs']) or "None"}
+Library directories:   {" ".join(config['linker']['lib_dirs']) or "None"}
+Source directories:    {" ".join(config['source']['source_dirs']) or "None"}
+================================================
         """
     )
 
 def print_build_summary(stats: BuildStats):
     log.info(
         f"""
-===============
+================================================
 BUILD ENDED:           {datetime.datetime.now().strftime('%c')}
-===============
+================================================
 Compiled:              {stats.compiled}
 Skipped:               {stats.skipped}
 Failed:                {stats.failed}
 Linked:                {stats.linked}
 Duration:              {stats.build_end - stats.build_start:.3f} s
-===============
+================================================
         """
     )
 
