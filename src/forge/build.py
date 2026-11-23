@@ -26,43 +26,38 @@ def collect_objects(config):
     return objects
 
 def build(config):
-    # Log config
-    log.info("=" * 20)
-    log.info(f"BUILD STARTED:  {datetime.datetime.now().strftime('%c')}")
-    log.info(f"Project:        {config['project']['name']}")
-    log.info(f"Profile:        {config['profile']}")
-    log.info(f"Compiler:       {config['compiler']['executable']}")
-    log.info(f"Compiler flags: {config['compiler']['flags']}")
-    log.info(f"Linker flags:   {config['linker']['flags']}")
-    log.info(f"Libraries:      {config['linker']['libs']}")
-    
-    log.info(f"output:         {config['output']['output_name']}")
-    log.info(f"build dir:      {config['output']['build_dir']}")
-    log.info(f"obj dir:        {config['output']['obj_dir']}")
-
-    log.info(f"Logging dir:    {config['logging']['log_dir']}")
-    log.info(f"Include dirs:   {config['source']['include_dirs']}")
-    log.info(f"Library dirs:   {config['linker']['lib_dirs']}")
-    log.info(f"Source dirs:    {config['source']['source_dirs']}")
+    # Log basic config
+    log.info(
+        f"""
+===============
+~ FORGESCRIPT ~
+===============
+BUILD STARTED:         {datetime.datetime.now().strftime('%c')}
+Project:               {config['project']['name']}
+Profile:               {config['profile']}
+Compiler:              {config['compiler']['executable']}
+Compiler flags:        {config['compiler']['flags']}
+Linker flags:          {config['linker']['flags']}
+Libraries:             {config['linker']['libs']}
+Output:                {config['output']['output_name']}
+Build directory:       {config['output']['build_dir']}
+Object directory:      {config['output']['obj_dir']}
+Logging directory:     {config['logging']['log_dir']}
+Include directories:   {config['source']['include_dirs']}
+Library directories:   {config['linker']['lib_dirs']}
+Source directories:    {config['source']['source_dirs']}
+===============\n
+        """
+    )
 
     # Collect source files
     sources = collect_sources(config)
-
-    # Log sources
-    log.info("Discovered sources:")
-    for source in sources:
-        log.info(source)
     
     # Compile sources
     compile_sources(config, sources)
 
     # Collect object files
     objects = collect_objects(config)
-
-    # Log objects
-    log.info("Discovered objects:")
-    for object in objects:
-        log.info(object)
 
     # Link objects
     link_objects(config, objects)
