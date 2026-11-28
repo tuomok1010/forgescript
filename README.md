@@ -1,4 +1,5 @@
 # Forgescript
+
 ![Status](https://img.shields.io/badge/Status-Early%20Development-orange)
 ![Linux](https://img.shields.io/badge/Linux-Supported-FCC624?logo=linux&logoColor=black)
 ![Windows](https://img.shields.io/badge/Windows-Planned-0078D4?logo=windows&logoColor=white)
@@ -8,24 +9,52 @@
 ![Emacs](https://img.shields.io/badge/Emacs-Planned-7F5AB6?logo=gnu-emacs&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A lightweight cross-platform build system for C and C++ projects.
+A lightweight TOML-based build system for C and C++ projects.
 
 Forgescript is implemented in Python and configured with TOML. Its goal is to provide a simple, transparent build workflow without requiring large external build systems.
 
-## Current Features
+---
+
+## Features
+
+### Configuration
 
 - TOML-based project configuration
 - Debug and Release build profiles
 - Command-line configuration overrides
-- Recursive source file discovery
-- Automatic build directory creation
-- Compilation of C and C++ source files
-- Executable linking
-- Project-relative path handling
-- Preserved source tree structure in object directories
-- Incremental compilation
+- Built-in configuration validation
+- Project-relative path resolution
 
-## Example Project Structure
+### Build System
+
+- Recursive source discovery
+- Incremental compilation
+- Automatic object directory creation
+- Executable linking
+- Preserved source tree structure inside object directories
+
+### Commands
+
+- `forge build`
+- `forge run`
+- `forge clean`
+
+### Validation
+
+Forgescript validates:
+
+- Configuration schema
+- Compiler existence
+- Source directories
+- Include directories
+- Library directories
+- Build/output path safety
+
+---
+
+## Quick Example
+
+Project structure:
 
 ```text
 hello_world/
@@ -37,7 +66,7 @@ hello_world/
 └── log/
 ```
 
-## Example Configuration
+Minimal configuration:
 
 ```toml
 [project]
@@ -49,14 +78,6 @@ executable = "clang++"
 [source]
 source_dirs = ["src"]
 include_dirs = ["include"]
-
-[linker]
-libs = []
-lib_dirs = []
-
-[logging]
-enabled = true
-log_dir = "log"
 
 [profiles.debug.output]
 output_name = "hello_world"
@@ -70,149 +91,170 @@ flags = [
     "-Wall",
     "-Wextra"
 ]
-
-[profiles.debug.linker]
-flags = []
-
-[profiles.release.output]
-output_name = "hello_world"
-build_dir = "build/release"
-obj_dir = "build/release/obj"
-
-[profiles.release.compiler]
-flags = [
-    "-std=c++20",
-    "-O3",
-    "-DNDEBUG",
-    "-Wall",
-    "-Wextra"
-]
-
-[profiles.release.linker]
-flags = []
 ```
+
+---
 
 ## Usage
 
-### Build (Debug)
+### Build
+
+Debug build:
 
 ```bash
 forge build
 ```
 
-### Build (Release)
+Release build:
 
 ```bash
 forge build --profile release
 ```
 
-### Use a Custom Configuration File
+Build using a custom configuration file:
 
 ```bash
 forge build --config my_project.toml
 ```
 
-### Override Compiler
+---
+
+### Run
+
+Execute the currently built executable:
 
 ```bash
-forge build --compiler gcc
+forge run
 ```
 
-### Override Compiler Flags
+Execute the release build:
 
 ```bash
-forge build \
-    --compiler-flags \
-    -O0 \
-    -Wall
+forge run --profile release
 ```
 
-## Configuration Precedence
+---
 
-Forge resolves configuration using the following precedence order:
+### Clean
+
+Remove generated build artifacts:
+
+```bash
+forge clean
+```
+
+---
+
+## Configuration Resolution
+
+Configuration sources are merged in the following order:
 
 ```text
 CLI Overrides
-        ↓
+        │
+        ▼
 Selected Profile
-        ↓
+        │
+        ▼
 forge.toml
-        ↓
+        │
+        ▼
 Built-in Defaults
 ```
 
-Higher levels override lower levels.
+Higher layers override lower layers.
 
-## Path Resolution
+---
 
-All paths are resolved relative to the directory containing the configuration file.
-
-Example:
-
-```toml
-[source]
-source_dirs = ["src"]
-```
-
-If the configuration file is located at:
-
-```text
-/home/user/my_project/forge.toml
-```
-
-then Forge resolves the source directory as:
-
-```text
-/home/user/my_project/src
-```
-
-This ensures builds behave consistently regardless of the current working directory.
-
-## Current Status
-
-Forge is currently capable of:
+## Build Pipeline
 
 ```text
 forge.toml
-      ↓
-Load configuration
-      ↓
-Apply profile
-      ↓
-Apply CLI overrides
-      ↓
-Discover source files
-      ↓
-Compile source files
-      ↓
-Link executable
+      │
+      ▼
+Load Configuration
+      │
+      ▼
+Validate Configuration
+      │
+      ▼
+Discover Sources
+      │
+      ▼
+Incremental Compilation
+      │
+      ▼
+Link Executable
+      │
+      ▼
+Run (optional)
 ```
 
-The build pipeline has been verified by successfully building and running a C++ Hello World application.
+---
 
-## Planned Features
+## Example Build Output
 
-- Clean command
-- Run command
-- Improved logging
-- Cross-platform compiler support
-- Library projects
-- Shared libraries
+```text
+===============
+BUILD STARTED
+===============
+Project:               Hello World
+Profile:               debug
+Compiler:              clang++
+Compiler flags:        -std=c++20 -g -Wall -Wextra
+
+Skipping src/main.cpp (up-to-date)
+
+Compile complete
+Linking hello_world
+Linking complete
+
+===============
+BUILD ENDED
+===============
+Compiled:              0
+Skipped:               1
+Failed:                0
+Linked:                True
+Duration:              0.075 s
+===============
+```
+
+---
+
+## Roadmap
+
+### Near-Term
+
+- Improved error reporting
+- `compile_commands.json` generation
+- Enhanced logging
+- Better build summaries
+
+### Future
+
+- Windows support
 - Static libraries
+- Shared libraries
+- Dependency tracking for headers
 - Emacs integration
-- Build caching
+
+---
 
 ## Philosophy
 
-Forge aims to be:
+Forgescript aims to stay close to the underlying compiler toolchain.
+Instead of hiding compiler and linker behavior, Forgescript focuses on:
 
-- Simple
-- Transparent
-- Scriptable
-- Cross-platform
-- Easy to understand
+- Readable TOML configuration
+- Predictable build behavior
+- Easy debugging
+- Minimal magic
+- Clear compiler and linker invocation
 
-The project favors straightforward build logic and readable configuration over complex DSLs and hidden build behavior.
+The build commands generated by Forgescript should always be understandable by someone familiar with manually invoking `clang++` or `g++`.
+
+---
 
 ## License
 
