@@ -40,15 +40,25 @@ DEFAULTS = {
     }
 }
 
+VALID_COMPILERS = ["gcc", "g++", "clang", "clang++", "clang-cl"]
+
 def load_toml(path : str):
     with open(path, "rb") as file:
         return tomllib.load(file)
 
 def validate_type(value: object, expected_type: type, name: str):
     if not isinstance(value, expected_type):
-        raise ValueError(f"{name} must be of type {expected_type.__name__}")
+        raise ValueError(f"{name} must be of type {expected_type.__name__}, got {type(value).__name__}")
 
-def validate_schema(config):
+def validate_path(project_root: Path, path: Path, name: str):
+    try:
+        path.relative_to(project_root)
+    except ValueError:
+        raise ValueError(f"{name} must be inside the project directory")
+    if path == project_root:
+        raise ValueError(f"{name} cannot be the project root directory")
+
+def validate_schema(config: dict):
     """ Validates data types of the config file"""
     #[project]
     validate_type(config["project"]["name"], str, "project.name")
@@ -75,8 +85,30 @@ def validate_schema(config):
     validate_type(config["output"]["build_dir"], str, "output.build_dir")
     validate_type(config["output"]["obj_dir"], str, "output.obj_dir")
 
+def validate_compiler(config: dict):
+    """Validate compiler by checking that it exists in the list VALID_COMPILERS"""
+    if not config["compiler"]["executable"] in VALID_COMPILERS:
+        compilers = ", ".join(VALID_COMPILERS)
+        raise ValueError(f"compiler.executable ({config['compiler']['executable']}) not supported. Supported compilers: {compilers}")
+
+def validate_paths(config: dict):
+    """Validate filepaths"""
+    project_root = (config["project"]["root"].resolve())
+    build_dir = (project_root / config["output"]["build_dir"]).resolve()
+    obj_dir = (project_root / config["output"]["obj_dir"]).resolve()
+    log_dir = (project_root / config["logging"]["log_dir"]).resolve()
+
+    # Make sure all paths are valid (ensures safe clean of log and build files)
+    validate_path(project_root, build_dir, "output.build_dir")
+    validate_path(project_root, obj_dir, "output.obj_dir")
+    validate_path(project_root, log_dir, "logging.log_dir")
+    
+
 def validate(config: dict):
+    """Validates config"""
     validate_schema(config)
+    validate_compiler(config)
+    validate_paths(config)
     
 
 def deep_merge(dst, src):
@@ -86,6 +118,7 @@ def deep_merge(dst, src):
         else:
             dst[key] = value
     return dst
+
 
 def configure(config_path: str, profile: str, overrides: dict):
     # Assign default values to current config
@@ -98,10 +131,7 @@ def configure(config_path: str, profile: str, overrides: dict):
     profiles = toml_config.get("profiles", {})
     if profile not in profiles:
         available = ", ".join(profiles.keys())
-        raise ValueError(
-            f"Unknown profile '{profile}'. "
-            f"Available profiles: {available}"
-        )
+        raise ValueError(f"Unknown profile '{profile}'. Available profiles: {available}")
     profile_config = profiles[profile]
     
     # Remove all profiles sections from the config file
