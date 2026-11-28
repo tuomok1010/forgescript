@@ -44,10 +44,40 @@ def load_toml(path : str):
     with open(path, "rb") as file:
         return tomllib.load(file)
 
+def validate_type(value: object, expected_type: type, name: str):
+    if not isinstance(value, expected_type):
+        raise ValueError(f"{name} must be of type {expected_type.__name__}")
+
+def validate_schema(config):
+    """ Validates data types of the config file"""
+    #[project]
+    validate_type(config["project"]["name"], str, "project.name")
+
+    #[compiler]
+    validate_type(config["compiler"]["executable"], str, "compiler.executable")
+    validate_type(config["compiler"]["flags"], list, "compiler.flags")
+
+    # [source]
+    validate_type(config["source"]["source_dirs"], list, "source.source_dirs")
+    validate_type(config["source"]["include_dirs"], list, "source.include_dirs")
+
+    # [linker]
+    validate_type(config["linker"]["libs"], list, "linker.libs")
+    validate_type(config["linker"]["lib_dirs"], list, "linker.lib_dirs")
+    validate_type(config["linker"]["flags"], list, "linker.flags")
+
+    # [logging]
+    validate_type(config["logging"]["enabled"], bool, "logging.enabled")
+    validate_type(config["logging"]["log_dir"], str, "logging.log_dir")
+
+    # [output]
+    validate_type(config["output"]["output_name"], str, "output.output_name")
+    validate_type(config["output"]["build_dir"], str, "output.build_dir")
+    validate_type(config["output"]["obj_dir"], str, "output.obj_dir")
+
 def validate(config: dict):
-    # TODO: implement
-    # Validate build_dir <-- must be inside project root, should also explicitly disallow root folder "/"
-    None
+    validate_schema(config)
+    
 
 def deep_merge(dst, src):
     for key, value in src.items():
