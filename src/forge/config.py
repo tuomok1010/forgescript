@@ -58,6 +58,27 @@ def validate_path(project_root: Path, path: Path, name: str):
     if path == project_root:
         raise ValueError(f"{name} cannot be the project root directory")
 
+def validate_source_dir(project_root: Path, source_dir: Path):
+    path = (project_root / source_dir)
+    if not path.exists():
+        raise ValueError(f"Source directory '{source_dir}' does not exist")
+    if not path.is_dir():
+        raise ValueError(f"Source directory '{source_dir}' is not a directory")
+
+def validate_include_dir(project_root: Path, include_dir: Path):
+    path = (project_root / include_dir)
+    if not path.exists():
+        raise ValueError(f"Include directory '{include_dir}' does not exist")
+    if not path.is_dir():
+        raise ValueError(f"Include directory '{include_dir}' is not a directory")
+
+def validate_lib_dir(project_root: Path, lib_dir: Path):
+    path = (project_root / lib_dir)
+    if not path.exists():
+        raise ValueError(f"Library directory '{lib_dir}' does not exist")
+    if not path.is_dir():
+        raise ValueError(f"Library directory '{lib_dir}' is not a directory")
+
 def validate_schema(config: dict):
     """ Validates data types of the config file"""
     #[project]
@@ -102,14 +123,33 @@ def validate_paths(config: dict):
     validate_path(project_root, build_dir, "output.build_dir")
     validate_path(project_root, obj_dir, "output.obj_dir")
     validate_path(project_root, log_dir, "logging.log_dir")
-    
+
+def validate_source_dirs(config: dict):
+    """Validate source directories"""
+    project_root = config["project"]["root"]
+    for source_dir in config["source"]["source_dirs"]:
+        validate_source_dir(project_root, source_dir)
+
+def validate_include_dirs(config: dict):
+    """Validate include directories"""
+    project_root = config["project"]["root"]
+    for include_dir in config["source"]["include_dirs"]:
+        validate_include_dir(project_root, include_dir)
+
+def validate_lib_dirs(config: dict):
+    """Validate library directories"""
+    project_root = config["project"]["root"]
+    for lib_dir in config["linker"]["lib_dirs"]:
+        validate_include_dir(project_root, lib_dir)
 
 def validate(config: dict):
     """Validates config"""
     validate_schema(config)
     validate_compiler(config)
     validate_paths(config)
-    
+    validate_source_dirs(config)
+    validate_include_dirs(config)
+    validate_lib_dirs(config)
 
 def deep_merge(dst, src):
     for key, value in src.items():
